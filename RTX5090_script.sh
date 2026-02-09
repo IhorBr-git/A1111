@@ -31,7 +31,8 @@ echo "Configuring webui-user.sh..."
 cat > "$WEBUI_DIR/webui-user.sh" << 'EOF'
 #!/bin/bash
 python_cmd="python3.11"
-export COMMANDLINE_ARGS="--listen --port 3000 --xformers --enable-insecure-extension-access --no-half-vae --api --skip-root-check"
+can_run_as_root=1
+export COMMANDLINE_ARGS="--listen --port 3000 --xformers --enable-insecure-extension-access --no-half-vae --api"
 EOF
 
 # ---- Clean up ----
@@ -42,3 +43,4 @@ rm -f /workspace/install_script.sh
 echo "Starting RunPod handler and A1111 WebUI..."
 /start.sh &
 cd "$WEBUI_DIR" && bash webui.sh
+
