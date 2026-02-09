@@ -1,38 +1,45 @@
 #!/bin/bash
 
-# -- Installation Script ---
-# This script handles the full installation of AUTOMATIC1111 Stable Diffusion WebUI
-# on RunPod (RTX 5090) without any extensions.
-# launch.py handles venv creation, torch, and all dependencies automatically.
+# -- Installation & Start Script ---
+# Base image: runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
+# This script installs and launches AUTOMATIC1111 Stable Diffusion WebUI
+# on RunPod with no additional extensions or modifications.
 
 set -e
 
-# Change to the /workspace directory to ensure all files are downloaded correctly.
-cd /workspace
+WEBUI_DIR="/workspace/stable-diffusion-webui"
 
-# ---- Clone A1111 ----
-echo "Cloning AUTOMATIC1111 Stable Diffusion WebUI..."
-if [ ! -d "/workspace/stable-diffusion-webui" ]; then
-    git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git /workspace/stable-diffusion-webui
+# ---- Install system dependencies ----
+echo "Installing system dependencies..."
+apt-get update && apt-get install -y --no-install-recommends \
+    wget git libgl1 libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---- Clone A1111 (skip if already present for pod restarts) ----
+if [ ! -d "$WEBUI_DIR" ]; then
+    echo "Cloning AUTOMATIC1111 Stable Diffusion WebUI..."
+    git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "$WEBUI_DIR"
 else
-    echo "Repository already exists, pulling latest changes..."
-    git -C /workspace/stable-diffusion-webui pull
+    echo "WebUI already exists, pulling latest changes..."
+    cd "$WEBUI_DIR" && git pull
 fi
 
-# ---- Create run script ----
-echo "Creating run script..."
-cat > /workspace/run_a1111.sh << 'EOF'
+# ---- Configure webui-user.sh ----
+echo "Configuring webui-user.sh..."
+cat > "$WEBUI_DIR/webui-user.sh" << 'EOF'
 #!/bin/bash
-cd /workspace/stable-diffusion-webui
-python launch.py \
-    --listen \
-    --port 3000 \
-    --xformers \
-    --enable-insecure-extension-access \
-    --no-half-vae \
-    --api
+export COMMANDLINE_ARGS="--listen --port 3000 --xformers --enable-insecure-extension-access --no-half-vae --api"
 EOF
-chmod +x /workspace/run_a1111.sh
+
+# ---- Clean up ----
+echo "Cleaning up..."
+rm -f /workspace/install_script.sh
+
+# ---- Start services ----
+echo "Starting RunPod handler and A1111 WebUI..."
+/start.sh &
+cd "$WEBUI_DIR" && bash webui.sh
+
 
 # ---- Clean up ----
 echo "Cleaning up..."
