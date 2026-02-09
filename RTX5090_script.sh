@@ -16,13 +16,9 @@ apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ---- Clone A1111 (skip if already present for pod restarts) ----
-if [ ! -d "$WEBUI_DIR" ]; then
+
     echo "Cloning AUTOMATIC1111 Stable Diffusion WebUI..."
     git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "$WEBUI_DIR"
-else
-    echo "WebUI already exists, pulling latest changes..."
-    cd "$WEBUI_DIR" && git pull
-fi
 
 # ---- Configure webui-user.sh ----
 echo "Configuring webui-user.sh..."
@@ -39,12 +35,3 @@ rm -f /workspace/install_script.sh
 echo "Starting RunPod handler and A1111 WebUI..."
 /start.sh &
 cd "$WEBUI_DIR" && bash webui.sh
-
-
-# ---- Clean up ----
-echo "Cleaning up..."
-rm -f /workspace/install_script.sh
-
-# ---- Start services ----
-echo "Starting A1111 and RunPod services..."
-(/start.sh & /workspace/run_a1111.sh)
