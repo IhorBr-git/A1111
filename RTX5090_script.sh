@@ -3,6 +3,7 @@
 # -- Installation Script ---
 # This script handles the full installation of AUTOMATIC1111 Stable Diffusion WebUI
 # on RunPod (RTX 5090) without any extensions.
+# launch.py handles venv creation, torch, and all dependencies automatically.
 
 set -e
 
@@ -18,28 +19,11 @@ else
     git -C /workspace/stable-diffusion-webui pull
 fi
 
-cd /workspace/stable-diffusion-webui
-
-# ---- Create virtual environment ----
-echo "Creating Python virtual environment..."
-python3 -m venv venv
-source venv/bin/activate
-
-# ---- Install PyTorch with CUDA support ----
-echo "Installing PyTorch with CUDA support..."
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-
-# ---- Install A1111 dependencies ----
-echo "Installing A1111 dependencies..."
-pip install -r requirements_versions.txt
-pip install xformers
-
 # ---- Create run script ----
 echo "Creating run script..."
 cat > /workspace/run_a1111.sh << 'EOF'
 #!/bin/bash
 cd /workspace/stable-diffusion-webui
-source venv/bin/activate
 python launch.py \
     --listen \
     --port 3000 \
