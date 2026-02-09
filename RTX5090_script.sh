@@ -16,9 +16,13 @@ apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ---- Clone A1111 (skip if already present for pod restarts) ----
-
+if [ ! -d "$WEBUI_DIR" ]; then
     echo "Cloning AUTOMATIC1111 Stable Diffusion WebUI..."
     git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "$WEBUI_DIR"
+else
+    echo "WebUI already exists, pulling latest changes..."
+    cd "$WEBUI_DIR" && git pull
+fi
 
 # ---- Configure webui-user.sh ----
 echo "Configuring webui-user.sh..."
