@@ -34,12 +34,16 @@ python_cmd="python3.11"
 export COMMANDLINE_ARGS="--listen --port 3000 --xformers --enable-insecure-extension-access --no-half-vae --api"
 EOF
 
-# ---- Pre-create venv and install setuptools (needed for pkg_resources with Python 3.11) ----
-echo "Setting up Python venv with setuptools..."
+# ---- Pre-create venv and fix Python 3.11 build dependencies ----
+echo "Setting up Python venv..."
 if [ ! -d "$WEBUI_DIR/venv" ]; then
     python3.11 -m venv "$WEBUI_DIR/venv"
 fi
-"$WEBUI_DIR/venv/bin/pip" install setuptools
+echo "Installing build dependencies in venv..."
+"$WEBUI_DIR/venv/bin/pip" install --upgrade pip setuptools wheel
+# Pre-install CLIP without build isolation to avoid pkg_resources error
+echo "Pre-installing CLIP..."
+"$WEBUI_DIR/venv/bin/pip" install --no-build-isolation https://github.com/openai/CLIP/archive/d50d76daa670286dd6cacf3bcd80b5e4823fc8e1.zip
 
 # ---- Clean up ----
 echo "Cleaning up..."
