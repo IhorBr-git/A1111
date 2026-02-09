@@ -34,6 +34,10 @@ python_cmd="python3.11"
 export COMMANDLINE_ARGS="--listen --port 3000 --xformers --enable-insecure-extension-access --no-half-vae --api"
 EOF
 
+# ---- Ensure setuptools is available (needed for pkg_resources with Python 3.11) ----
+echo "Installing setuptools..."
+pip install setuptools
+
 # ---- Clean up ----
 echo "Cleaning up..."
 rm -f /workspace/install_script.sh
